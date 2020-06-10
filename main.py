@@ -1,41 +1,40 @@
 import pygame
 import random
 from UI.button import Button
-from Methods.insertion import insertionPlay
-from State.manager import getState
+from UI.menu import Menu
+from State.manager import *
+from Methods.bubble import Bubble
+from Methods.insertion import Insertion
 
-display_width, display_height = 500, 500
+setSize(500, 500)
+done = False
 
+# Starting pygame
 pygame.init()
-display = pygame.display.set_mode((display_width, display_height))
+display = pygame.display.set_mode(getSize())
 pygame.display.set_caption("Sorting Visualisation")
 clock = pygame.time.Clock()
 
-rowColor = (0, 0, 0)
-done = False
-
-numRows = 100
+numRows = 10
 numbers = [x for x in range(numRows)]
 random.shuffle(numbers)
 
-elements = []
+# Defaults as Menu State
+mainMenu = Menu()
+changeState(mainMenu)
 
-# Adding buttons to menu (state: "menu")
-insertionButton = Button(100, 100, (26, 83, 92), "insertion")
-elements.append(insertionButton)
+# Adding sorting methods
+bubbleVisual = Bubble(mainMenu)
+insertionVisual = Insertion(mainMenu)
+mainMenu.elements.append(bubbleVisual.createButton(200, 100, (78, 205, 196)))
+mainMenu.elements.append(insertionVisual.createButton(100, 100, (26, 83, 92)))
 
 while not done:
-    clock.tick(30)
+    clock.tick(60)
     event = pygame.event.get()
 
     state = getState()
-
-    if state == "menu":
-        display.fill((169,169,169))
-        for elem in elements:
-            elem.update(display, event)
-    elif state == "insertion":
-        insertionPlay(display)
+    state.update(display, event, numbers)
 
     for e in event:
         if e.type == pygame.QUIT:
