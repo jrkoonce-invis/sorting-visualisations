@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 from UI.button import Button
 from UI.menu import Menu
 from State.manager import *
@@ -15,12 +16,13 @@ display = pygame.display.set_mode(getSize())
 pygame.display.set_caption("Sorting Visualisation")
 clock = pygame.time.Clock()
 
-numRows = 10
+numRows = 20
 numbers = [x for x in range(numRows)]
 random.shuffle(numbers)
 
 # Defaults as Menu State
 mainMenu = Menu()
+pastState = mainMenu
 changeState(mainMenu)
 
 # Adding sorting methods
@@ -34,6 +36,10 @@ while not done:
     event = pygame.event.get()
 
     state = getState()
+    if pastState != state and not pastState == mainMenu:
+        time.sleep(2)
+    pastState = state
+
     state.update(display, event, numbers)
 
     for e in event:

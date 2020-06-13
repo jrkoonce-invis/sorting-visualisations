@@ -1,5 +1,6 @@
 import pygame
 import random
+import time
 from UI.button import Button
 from UI.menu import Menu
 from State.manager import getWidth, getHeight, changeState
@@ -7,6 +8,7 @@ from State.manager import getWidth, getHeight, changeState
 class Insertion:
     def __init__(self, resetState):
         self.cursor = 0
+        self.cycle = 0
         self.currRowColor = (0, 0, 0)
         self.pastRowColor = (124,252,0)
         self.futureRowColor = (220,20,60)
@@ -18,10 +20,12 @@ class Insertion:
     def insertionStep(self, numbers, cursor):
         val = numbers[cursor]
 
-        while cursor != 0 and numbers[cursor - 1] > val:
+        if not cursor == 0 and val < numbers[cursor - 1]:
             numbers[cursor] = numbers[cursor - 1]
             numbers[cursor - 1] = val
-            cursor -= 1
+        else:
+            self.cycle += 1
+            self.cursor = self.cycle
 
         return numbers
 
@@ -32,22 +36,23 @@ class Insertion:
         numbers = self.insertionStep(numbers, self.cursor)
 
         for i in range(numRows):
-            if i > self.cursor:
-                color = self.futureRowColor
-            elif i < self.cursor or self.cursor == numRows - 1:
+            if self.cursor > numRows:
                 color = self.pastRowColor
-            else:
+            elif i == self.cursor:
                 color = self.currRowColor
+            else:
+                color = self.futureRowColor
 
             rect = (0, i * getHeight() / numRows, numbers[i] * getHeight() / numRows, getHeight() / numRows)
             pygame.draw.rect(display, color, rect)
 
-        if self.cursor < numRows - 1:
-            self.cursor += 1
-        else:
+        if self.cursor > numRows:
+            self.cycle = 0
             self.cursor = 0
             changeState(self.resetState)
             random.shuffle(numbers)
+        else:
+            self.cursor -= 1
 
         for e in event:
             if e.type == pygame.KEYDOWN and e.key == pygame.K_ESCAPE:
